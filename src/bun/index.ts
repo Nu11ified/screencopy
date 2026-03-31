@@ -17,6 +17,7 @@ Bun.serve({
 		const url = new URL(req.url);
 		if (url.pathname === "/quit") {
 			console.log("Quit requested from panel");
+			tray.remove();
 			setTimeout(() => process.exit(0), 100);
 			return new Response("ok", {
 				headers: { "Access-Control-Allow-Origin": "*" },
