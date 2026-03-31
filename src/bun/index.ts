@@ -222,7 +222,7 @@ if (savedShortcuts) {
 	try {
 		const parsed = JSON.parse(savedShortcuts);
 		// Skip saved config if it uses old conflicting defaults
-		if (parsed.captureFullscreen?.includes("Shift")) {
+		if (parsed.captureFullscreen?.includes("Shift") || parsed.captureFullscreen?.includes("Alt")) {
 			console.log("Resetting shortcuts from old defaults");
 			await storage.setSetting("shortcuts", "");
 			shortcuts.register();

@@ -18,9 +18,9 @@ function eventToAccelerator(e: KeyboardEvent): string | null {
 	if (["Meta", "Shift", "Control", "Alt"].includes(e.key)) return null;
 	const parts: string[] = [];
 	if (e.metaKey) parts.push("CommandOrControl");
-	if (e.shiftKey) parts.push("Shift");
-	if (e.altKey) parts.push("Alt");
 	if (e.ctrlKey && !e.metaKey) parts.push("Control");
+	if (e.shiftKey) parts.push("Shift");
+	if (e.altKey) parts.push("Option");
 	parts.push(e.key.length === 1 ? e.key.toUpperCase() : e.key);
 	return parts.join("+");
 }

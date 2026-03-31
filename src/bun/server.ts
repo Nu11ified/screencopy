@@ -166,9 +166,9 @@ export function createServer(
 				if (req.method === "GET" && path === "/api/shortcuts") {
 					const saved = await storage.getSetting("shortcuts");
 					const config = saved ? JSON.parse(saved) : {
-						captureFullscreen: "Control+Alt+C",
-						captureRegion: "Control+Alt+X",
-						openHistory: "Control+Alt+S",
+						captureFullscreen: "Control+Option+C",
+						captureRegion: "Control+Option+X",
+						openHistory: "Control+Option+S",
 					};
 					return Response.json(config, { headers });
 				}
