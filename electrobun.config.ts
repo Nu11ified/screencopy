@@ -25,4 +25,8 @@ export default {
 			bundleCEF: false,
 		},
 	},
+	// Uncomment and set baseUrl when ready to distribute:
+	// release: {
+	// 	baseUrl: "https://storage.googleapis.com/your-bucket/screencopy/",
+	// },
 } satisfies ElectrobunConfig;
