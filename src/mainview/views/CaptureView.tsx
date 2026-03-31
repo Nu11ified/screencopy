@@ -53,7 +53,7 @@ export function CaptureView({ onCaptured }: { onCaptured?: (c: Capture) => void 
 					{capturing ? "Capturing..." : "Capture & Copy"}
 				</button>
 				<div className="capture-hint">
-					<kbd>{"\u2303\u2325C"}</kbd> fullscreen &middot; <kbd>{"\u2303\u2325X"}</kbd> region &middot; <kbd>{"\u2303\u2325S"}</kbd> panel
+					Use the menu bar icon for quick capture
 				</div>
 			</div>
 

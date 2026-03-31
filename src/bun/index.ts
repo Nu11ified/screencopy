@@ -216,31 +216,46 @@ const shortcuts = new ShortcutService({
 	onOpenHistory: () => togglePanel(),
 });
 
-// Load saved shortcuts, then register
-const savedShortcuts = await storage.getSetting("shortcuts");
-if (savedShortcuts) {
-	try {
-		const parsed = JSON.parse(savedShortcuts);
-		// Skip saved config if it uses old conflicting defaults
-		if (parsed.captureFullscreen?.includes("Shift") || parsed.captureFullscreen?.includes("Alt")) {
-			console.log("Resetting shortcuts from old defaults");
-			await storage.setSetting("shortcuts", "");
-			shortcuts.register();
-		} else {
-			shortcuts.updateConfig(parsed);
-		}
-	} catch {
-		shortcuts.register();
-	}
-} else {
-	shortcuts.register();
-}
+// NOTE: GlobalShortcut is broken in Electrobun v1.16 for unsigned dev builds.
+// See https://github.com/blackboardsh/electrobun/issues/334
+// Shortcuts register but never fire because NSEvent global monitor
+// requires Accessibility permission that doesn't cascade to the bun subprocess.
+// Keeping the service for when this is fixed upstream.
+// shortcuts.register();
+console.log("Global shortcuts disabled (electrobun#334 — awaiting Carbon API fix)");
 
-// Tray click
+// Tray menu with quick actions
+tray.setMenu([
+	{ type: "normal", label: "Capture Fullscreen", action: "capture-full" },
+	{ type: "normal", label: "Capture Region", action: "capture-region" },
+	{ type: "divider" },
+	{ type: "normal", label: "Open Panel", action: "open-panel" },
+	{ type: "normal", label: "Open Screenshots Folder", action: "open-folder" },
+	{ type: "divider" },
+	{ type: "normal", label: "Quit Screencopy", action: "quit" },
+]);
+
 tray.on("tray-clicked", (e) => {
 	const { action } = e.data as { id: number; action: string };
-	if (action === "") {
-		togglePanel();
+	switch (action) {
+		case "":
+			togglePanel();
+			break;
+		case "capture-full":
+			captureFromShortcut("fullscreen");
+			break;
+		case "capture-region":
+			showRegionOverlay();
+			break;
+		case "open-panel":
+			showPanel();
+			break;
+		case "open-folder":
+			Bun.spawn(["open", STORAGE_DIR]);
+			break;
+		case "quit":
+			quit();
+			break;
 	}
 });
 

@@ -608,6 +608,13 @@
   background: var(--row-hover);
 }
 
+.settings-note {
+  padding: 4px 8px 6px;
+  font-size: 11px;
+  color: var(--text-tertiary);
+  line-height: 1.4;
+}
+
 /* ── Sync ── */
 
 .sync-form {

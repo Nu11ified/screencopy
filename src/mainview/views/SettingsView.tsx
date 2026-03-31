@@ -111,24 +111,15 @@ export function SettingsView() {
 
 	return (
 		<div className="view-content">
-			<div className="section-label">Shortcuts</div>
+			<div className="section-label">Quick Actions</div>
 			<div className="settings-group">
-				{Object.entries(SHORTCUT_LABELS).map(([key, label]) => (
-					<button
-						key={key}
-						className={`settings-row settings-row-btn ${editing === key ? "settings-row-editing" : ""}`}
-						onClick={() => setEditing(editing === key ? null : key)}
-					>
-						<span className="settings-label">{label}</span>
-						{editing === key ? (
-							<span className="settings-recording">Press keys...</span>
-						) : (
-							<kbd className="settings-kbd">
-								{formatShortcut(shortcuts[key] ?? "")}
-							</kbd>
-						)}
-					</button>
-				))}
+				<div className="settings-row">
+					<span className="settings-label">Capture</span>
+					<span className="settings-value">Click tray icon menu</span>
+				</div>
+				<div className="settings-note">
+					Global keyboard shortcuts coming soon. Right-click the menu bar icon for quick capture options.
+				</div>
 			</div>
 
 			<div className="sep" />
