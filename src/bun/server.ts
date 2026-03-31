@@ -12,6 +12,8 @@ export function createServer(
 	storage: StorageBackend,
 	storageDir: string,
 	onQuit: () => void,
+	onShortcutsChanged?: (config: Record<string, string>) => void,
+	onRegionCapture?: () => void,
 ) {
 	const headers = {
 		"Access-Control-Allow-Origin": "*",
@@ -146,6 +148,37 @@ export function createServer(
 				if (req.method === "POST" && path === "/api/sync/now") {
 					const result = await syncService.syncAll();
 					return Response.json(result, { headers });
+				}
+
+				// POST /api/capture/region — trigger region selection overlay
+				if (req.method === "POST" && path === "/api/capture/region") {
+					if (onRegionCapture) onRegionCapture();
+					return Response.json({ ok: true }, { headers });
+				}
+
+				// POST /api/storage/open — open storage folder in Finder
+				if (req.method === "POST" && path === "/api/storage/open") {
+					Bun.spawn(["open", storageDir]);
+					return Response.json({ ok: true }, { headers });
+				}
+
+				// GET/PUT /api/shortcuts
+				if (req.method === "GET" && path === "/api/shortcuts") {
+					const saved = await storage.getSetting("shortcuts");
+					const config = saved ? JSON.parse(saved) : {
+						captureFullscreen: "CommandOrControl+Shift+5",
+						captureRegion: "CommandOrControl+Shift+6",
+						openHistory: "CommandOrControl+Shift+V",
+					};
+					return Response.json(config, { headers });
+				}
+
+				if (req.method === "PUT" && path === "/api/shortcuts") {
+					const body = (await req.json()) as Record<string, string>;
+					await storage.setSetting("shortcuts", JSON.stringify(body));
+					// Signal the shortcut service to reload (via callback)
+					if (onShortcutsChanged) onShortcutsChanged(body);
+					return Response.json({ ok: true }, { headers });
 				}
 
 				// POST /api/quit

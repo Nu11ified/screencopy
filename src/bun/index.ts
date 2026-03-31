@@ -69,7 +69,11 @@ function quit() {
 }
 
 // Start API server
-createServer(API_PORT, captureService, presetService, syncService, storage, STORAGE_DIR, quit);
+createServer(API_PORT, captureService, presetService, syncService, storage, STORAGE_DIR, quit, (newConfig) => {
+	shortcuts.updateConfig(newConfig);
+}, () => {
+	showRegionOverlay();
+});
 console.log(`API server running on port ${API_PORT}`);
 
 // Check if Vite dev server is running for HMR
@@ -105,6 +109,7 @@ function showPanel() {
 		url: mainUrl,
 		titleBarStyle: "hidden",
 		styleMask: ["Borderless"],
+		transparent: true,
 		frame: {
 			width: PANEL_WIDTH,
 			height: PANEL_HEIGHT,
@@ -132,14 +137,69 @@ function togglePanel() {
 	}
 }
 
+// Region capture overlay
+let overlayWindow: InstanceType<typeof BrowserWindow> | null = null;
+
+function showRegionOverlay() {
+	if (overlayWindow) return;
+
+	// Close the panel first so it's not in the screenshot
+	if (panelWindow) {
+		panelWindow.close();
+		panelWindow = null;
+	}
+
+	// Small delay so panel closes before overlay appears
+	setTimeout(() => {
+		const overlayUrl = mainUrl.includes("localhost:5173")
+			? "http://localhost:5173/region-overlay.html"
+			: "views://mainview/region-overlay.html";
+
+		overlayWindow = new BrowserWindow({
+			title: "",
+			url: overlayUrl,
+			titleBarStyle: "hidden",
+			styleMask: ["Borderless"],
+			transparent: true,
+			frame: {
+				width: 1920,
+				height: 1200,
+				x: 0,
+				y: 0,
+			},
+		});
+
+		overlayWindow.setAlwaysOnTop(true);
+
+		// Poll for title changes to detect region selection completion
+		const checkTitle = setInterval(async () => {
+			if (!overlayWindow) {
+				clearInterval(checkTitle);
+				return;
+			}
+			// The overlay sets document.title when done
+			// We'll watch for the close event instead
+		}, 100);
+
+		overlayWindow.on("close", () => {
+			clearInterval(checkTitle);
+			overlayWindow = null;
+			// Show panel after capture
+			setTimeout(() => showPanel(), 300);
+		});
+	}, 200);
+}
+
 // Global shortcuts
 async function captureFromShortcut(mode: "fullscreen" | "region") {
+	if (mode === "region") {
+		showRegionOverlay();
+		return;
+	}
 	try {
 		const capture = await captureService.capture({ mode });
-		// Auto-copy plain text to clipboard
 		await presetService.applyAndCopy("plain", capture.text);
 		console.log(`Captured (${mode}): ${capture.text.slice(0, 60)}...`);
-		// Show panel so user can see result
 		showPanel();
 	} catch (err) {
 		console.error("Shortcut capture failed:", err);
@@ -151,7 +211,20 @@ const shortcuts = new ShortcutService({
 	onCaptureRegion: () => captureFromShortcut("region"),
 	onOpenHistory: () => togglePanel(),
 });
-shortcuts.register();
+
+// Load saved shortcuts, then register
+(async () => {
+	const savedShortcuts = await storage.getSetting("shortcuts");
+	if (savedShortcuts) {
+		try {
+			shortcuts.updateConfig(JSON.parse(savedShortcuts));
+		} catch {
+			shortcuts.register();
+		}
+	} else {
+		shortcuts.register();
+	}
+})();
 
 // Tray click
 tray.on("tray-clicked", (e) => {

@@ -35,6 +35,10 @@ async function request<T>(path: string, opts?: RequestInit): Promise<T> {
 }
 
 export const api = {
+	startRegionCapture() {
+		return request<{ ok: boolean }>("/api/capture/region", { method: "POST" });
+	},
+
 	capture(mode: string = "fullscreen", region?: { x: number; y: number; width: number; height: number }) {
 		return request<Capture>("/api/capture", {
 			method: "POST",
@@ -71,6 +75,23 @@ export const api = {
 
 	getPresets() {
 		return request<Preset[]>("/api/presets");
+	},
+
+	// Storage
+	openStorageFolder() {
+		return request<{ ok: boolean }>("/api/storage/open", { method: "POST" });
+	},
+
+	// Shortcuts
+	getShortcuts() {
+		return request<Record<string, string>>("/api/shortcuts");
+	},
+
+	updateShortcuts(config: Record<string, string>) {
+		return request<{ ok: boolean }>("/api/shortcuts", {
+			method: "PUT",
+			body: JSON.stringify(config),
+		});
 	},
 
 	// Sync

@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    --glass-bg: rgba(255, 255, 255, 0.65);
+    --glass-bg: rgba(245, 245, 247, 0.97);
     --glass-border: rgba(255, 255, 255, 0.45);
     --text-primary: rgba(0, 0, 0, 0.85);
     --text-secondary: rgba(0, 0, 0, 0.5);
@@ -20,7 +20,7 @@
 
   @media (prefers-color-scheme: dark) {
     :root {
-      --glass-bg: rgba(30, 30, 32, 0.72);
+      --glass-bg: rgba(36, 36, 38, 0.97);
       --glass-border: rgba(255, 255, 255, 0.08);
       --text-primary: rgba(255, 255, 255, 0.88);
       --text-secondary: rgba(255, 255, 255, 0.55);
@@ -36,7 +36,7 @@
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background: var(--glass-bg); margin: 0; -webkit-font-smoothing: antialiased; }
+  body { background: transparent; margin: 0; -webkit-font-smoothing: antialiased; }
   html {
     font-family: 'Geist Variable', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
     font-size: 13px;
@@ -554,13 +554,58 @@
   color: var(--text-tertiary);
 }
 
-.settings-kbd {
+.settings-row-btn {
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  width: 100%;
+  transition: background 0.1s ease;
+}
+
+.settings-row-btn:hover {
+  background: var(--row-hover);
+}
+
+.settings-row-editing {
+  background: var(--row-active);
+}
+
+.settings-recording {
   font-size: 11px;
+  color: var(--accent);
+  font-weight: 500;
+  animation: pulse 1s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.settings-kbd {
+  font-size: 13px;
   padding: 2px 6px;
   border-radius: 4px;
   background: var(--pill-bg);
   color: var(--text-secondary);
   font-family: inherit;
+  letter-spacing: 1px;
+}
+
+.settings-open-btn {
+  padding: 4px 10px;
+  border: none;
+  border-radius: 6px;
+  background: var(--pill-bg);
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.1s ease;
+}
+
+.settings-open-btn:hover {
+  background: var(--row-hover);
 }
 
 /* ── Sync ── */

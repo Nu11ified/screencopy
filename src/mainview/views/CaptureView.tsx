@@ -10,12 +10,17 @@ export function CaptureView({ onCaptured }: { onCaptured?: (c: Capture) => void 
 	const [copied, setCopied] = useState(false);
 
 	const handleCapture = async () => {
+		if (mode === "region") {
+			// Trigger region selection overlay
+			await api.startRegionCapture();
+			return;
+		}
+
 		setCapturing(true);
 		try {
 			const capture = await api.capture(mode);
 			setLastCapture(capture);
 			onCaptured?.(capture);
-			// Auto-copy plain text
 			await api.copyCapture(capture.id, "plain");
 			setCopied(true);
 			setTimeout(() => setCopied(false), 2000);
@@ -48,7 +53,7 @@ export function CaptureView({ onCaptured }: { onCaptured?: (c: Capture) => void 
 					{capturing ? "Capturing..." : "Capture & Copy"}
 				</button>
 				<div className="capture-hint">
-					<kbd>Cmd+Shift+5</kbd> fullscreen &middot; <kbd>Cmd+Shift+6</kbd> region
+					<kbd>{"\u2318\u21E75"}</kbd> fullscreen &middot; <kbd>{"\u2318\u21E76"}</kbd> region
 				</div>
 			</div>
 
