@@ -1,0 +1,5 @@
+module CScreencopy {
+    header "include/screencopy.h"
+    link "screencopy"
+    export *
+}

@@ -1,6 +1,5 @@
-node_modules/
-dist/
-build/
 .DS_Store
+.build/
+.swiftpm/
 src/zig/.zig-cache/
 src/zig/zig-out/
