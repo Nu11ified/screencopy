@@ -168,7 +168,7 @@ export function createServer(
 					const config = saved ? JSON.parse(saved) : {
 						captureFullscreen: "CommandOrControl+Shift+1",
 						captureRegion: "CommandOrControl+Shift+2",
-						openHistory: "CommandOrControl+Shift+Space",
+						openHistory: "CommandOrControl+Shift+S",
 					};
 					return Response.json(config, { headers });
 				}

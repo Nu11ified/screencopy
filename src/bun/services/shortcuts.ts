@@ -9,7 +9,7 @@ export interface ShortcutConfig {
 const DEFAULT_SHORTCUTS: ShortcutConfig = {
 	captureFullscreen: "CommandOrControl+Shift+1",
 	captureRegion: "CommandOrControl+Shift+2",
-	openHistory: "CommandOrControl+Shift+Space",
+	openHistory: "CommandOrControl+Shift+S",
 };
 
 export class ShortcutService {
