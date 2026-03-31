@@ -109,7 +109,17 @@ struct CapturePanel: View {
                 .disabled(captureService.isCapturing)
 
                 Button {
-                    // TODO: Region capture
+                    let overlay = RegionOverlayController()
+                    overlay.show { [self] rect in
+                        Task {
+                            if let capture = await captureService.captureRegion(rect) {
+                                storage.saveCapture(capture)
+                                ClipboardService.copyWithPreset(capture.text, preset: Preset.defaults[0])
+                                copied = true
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 2) { copied = false }
+                            }
+                        }
+                    }
                 } label: {
                     HStack {
                         Image(systemName: "crop")
