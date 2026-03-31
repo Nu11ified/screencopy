@@ -1,107 +1,81 @@
-import Carbon
 import AppKit
+import Carbon
 
 class HotkeyService {
     typealias Handler = () -> Void
 
-    private var hotkeys: [(id: EventHotKeyID, ref: EventHotKeyRef?, handler: Handler)] = []
-    private var nextId: UInt32 = 1
-    private static var instance: HotkeyService?
+    private var monitors: [Any] = []
+    private var hotkeys: [(modifiers: NSEvent.ModifierFlags, keyCode: UInt16, handler: Handler)] = []
 
-    init() {
-        HotkeyService.instance = self
-        installHandler()
+    func register(keyCode: UInt16, modifiers: NSEvent.ModifierFlags, handler: @escaping Handler) {
+        hotkeys.append((modifiers: modifiers, keyCode: keyCode, handler: handler))
+        print("[Hotkey] Registered keyCode=\(keyCode) modifiers=\(modifiers.rawValue)")
     }
 
-    func register(keyCode: UInt32, modifiers: UInt32, handler: @escaping Handler) {
-        var hotKeyID = EventHotKeyID()
-        hotKeyID.signature = 0x5343_5059 // 'SCPY'
-        hotKeyID.id = nextId
-        nextId += 1
-
-        var hotKeyRef: EventHotKeyRef?
-        let status = RegisterEventHotKey(
-            keyCode,
-            modifiers,
-            hotKeyID,
-            GetApplicationEventTarget(),
-            0,
-            &hotKeyRef
+    func start() {
+        // Global monitor — catches events when app is NOT focused
+        let globalMonitor = NSEvent.addGlobalMonitorForEvents(
+            matching: .keyDown,
+            handler: { [weak self] event in
+                self?.handleEvent(event)
+            }
         )
+        if let globalMonitor { monitors.append(globalMonitor) }
 
-        if status == noErr {
-            hotkeys.append((id: hotKeyID, ref: hotKeyRef, handler: handler))
-            print("[Hotkey] Registered keyCode=\(keyCode) modifiers=0x\(String(modifiers, radix: 16)) id=\(hotKeyID.id)")
-        } else {
-            print("[Hotkey] Failed to register: status=\(status)")
-        }
+        // Local monitor — catches events when app IS focused
+        let localMonitor = NSEvent.addLocalMonitorForEvents(
+            matching: .keyDown,
+            handler: { [weak self] event in
+                if self?.handleEvent(event) == true {
+                    return nil // consumed
+                }
+                return event
+            }
+        )
+        if let localMonitor { monitors.append(localMonitor) }
+
+        print("[Hotkey] Monitoring started (\(hotkeys.count) hotkeys)")
     }
 
-    func unregisterAll() {
+    @discardableResult
+    private func handleEvent(_ event: NSEvent) -> Bool {
+        let eventMods = event.modifierFlags.intersection([.control, .option, .command, .shift])
+
         for hotkey in hotkeys {
-            if let ref = hotkey.ref {
-                UnregisterEventHotKey(ref)
+            if event.keyCode == hotkey.keyCode && eventMods == hotkey.modifiers {
+                print("[Hotkey] Triggered keyCode=\(hotkey.keyCode)")
+                hotkey.handler()
+                return true
             }
         }
+        return false
+    }
+
+    func stop() {
+        for monitor in monitors {
+            NSEvent.removeMonitor(monitor)
+        }
+        monitors.removeAll()
         hotkeys.removeAll()
     }
 
     /// Register default shortcuts:
-    /// - Ctrl+Option+C (keyCode 8) = capture fullscreen
-    /// - Ctrl+Option+X (keyCode 7) = capture region
-    /// - Ctrl+Option+S (keyCode 1) = toggle panel
+    /// - Ctrl+Option+C = capture fullscreen
+    /// - Ctrl+Option+X = capture region
+    /// - Ctrl+Option+S = toggle panel
     func registerDefaults(
         onCaptureFullscreen: @escaping Handler,
         onCaptureRegion: @escaping Handler,
         onTogglePanel: @escaping Handler
     ) {
-        let ctrlOpt: UInt32 = UInt32(Carbon.controlKey | Carbon.optionKey)
+        let ctrlOpt: NSEvent.ModifierFlags = [.control, .option]
         register(keyCode: 8, modifiers: ctrlOpt, handler: onCaptureFullscreen)   // C
         register(keyCode: 7, modifiers: ctrlOpt, handler: onCaptureRegion)       // X
         register(keyCode: 1, modifiers: ctrlOpt, handler: onTogglePanel)         // S
-    }
-
-    private func installHandler() {
-        var eventType = EventTypeSpec(
-            eventClass: OSType(kEventClassKeyboard),
-            eventKind: UInt32(kEventHotKeyPressed)
-        )
-
-        InstallEventHandler(
-            GetApplicationEventTarget(),
-            { (_, event, _) -> OSStatus in
-                var hotKeyID = EventHotKeyID()
-                GetEventParameter(
-                    event,
-                    EventParamName(kEventParamDirectObject),
-                    EventParamType(typeEventHotKeyID),
-                    nil,
-                    MemoryLayout<EventHotKeyID>.size,
-                    nil,
-                    &hotKeyID
-                )
-
-                if let instance = HotkeyService.instance {
-                    for hotkey in instance.hotkeys {
-                        if hotkey.id.id == hotKeyID.id {
-                            DispatchQueue.main.async {
-                                print("[Hotkey] Triggered id=\(hotKeyID.id)")
-                                hotkey.handler()
-                            }
-                            return noErr
-                        }
-                    }
-                }
-                return OSStatus(eventNotHandledErr)
-            },
-            1,
-            &eventType,
-            nil,
-            nil
-        )
+        start()
     }
 
     deinit {
-        unregisterAll()
+        stop()
     }
 }
