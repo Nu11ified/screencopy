@@ -68,6 +68,10 @@ function quit() {
 	setTimeout(() => process.exit(0), 100);
 }
 
+// Clean up tray icon on SIGINT/SIGTERM (Ctrl+C, kill)
+process.on("SIGINT", quit);
+process.on("SIGTERM", quit);
+
 // Start API server
 createServer(API_PORT, captureService, presetService, syncService, storage, STORAGE_DIR, quit, (newConfig) => {
 	shortcuts.updateConfig(newConfig);
