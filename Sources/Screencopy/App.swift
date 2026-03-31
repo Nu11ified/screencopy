@@ -4,21 +4,24 @@ import SwiftUI
 struct ScreencopyApp: App {
     @StateObject private var captureService = CaptureService()
     @StateObject private var storage = StorageService()
+    @StateObject private var syncService: SyncService
     private let hotkeyService = HotkeyService()
 
     init() {
-        // Register global hotkeys after a short delay to ensure app is ready
+        let storageInstance = StorageService()
+        _storage = StateObject(wrappedValue: storageInstance)
+        _syncService = StateObject(wrappedValue: SyncService(storage: storageInstance))
+
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [hotkeyService] in
             hotkeyService.registerDefaults(
                 onCaptureFullscreen: {
-                    print("[App] Fullscreen capture triggered via hotkey")
-                    // Capture is handled by the service
+                    print("[Hotkey] Fullscreen capture")
                 },
                 onCaptureRegion: {
-                    print("[App] Region capture triggered via hotkey")
+                    print("[Hotkey] Region capture")
                 },
                 onTogglePanel: {
-                    print("[App] Toggle panel triggered via hotkey")
+                    print("[Hotkey] Toggle panel")
                 }
             )
         }
@@ -29,6 +32,7 @@ struct ScreencopyApp: App {
             MenuBarView()
                 .environmentObject(captureService)
                 .environmentObject(storage)
+                .environmentObject(syncService)
         } label: {
             Image(systemName: "camera.viewfinder")
                 .symbolRenderingMode(.hierarchical)
