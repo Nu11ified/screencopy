@@ -1,114 +1,171 @@
 import { useState } from "react";
+import { sendQuit } from "./lib/electrobun";
+
+type CaptureMode = "fullscreen" | "window" | "area";
 
 function App() {
-	const [count, setCount] = useState(0);
+	const [mode, setMode] = useState<CaptureMode>("fullscreen");
+	const [timer, setTimer] = useState(0);
+	const [showPointer, setShowPointer] = useState(false);
+	const [showQuitConfirm, setShowQuitConfirm] = useState(false);
+
+	const timerOptions = [0, 3, 5, 10];
 
 	return (
-		<div className="min-h-screen bg-gradient-to-br from-indigo-500 to-purple-600 text-gray-900">
-			<div className="container mx-auto px-4 py-10 max-w-3xl">
-				<h1 className="text-5xl font-bold text-center text-white mb-2 drop-shadow-lg">
-					React + Tailwind + Vite
-				</h1>
-				<p className="text-xl text-center text-white/90 mb-10">
-					A fast Electrobun app with hot module replacement
-				</p>
-
-				<div className="bg-white rounded-xl shadow-xl p-8 mb-8">
-					<h2 className="text-2xl font-semibold text-indigo-600 mb-4">
-						Interactive Counter
-					</h2>
-					<p className="mb-4 text-gray-600">
-						Click the button below to test React state. With HMR enabled, you
-						can edit this component and see changes instantly without losing
-						state.
-					</p>
-					<div className="flex items-center gap-4">
-						<button
-							onClick={() => setCount((c) => c + 1)}
-							className="px-6 py-3 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition-colors shadow-md hover:shadow-lg"
-						>
-							Count: {count}
-						</button>
-						<button
-							onClick={() => setCount(0)}
-							className="px-4 py-3 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300 transition-colors"
-						>
-							Reset
-						</button>
-					</div>
-				</div>
-
-				<div className="bg-white rounded-xl shadow-xl p-8 mb-8">
-					<h2 className="text-2xl font-semibold text-indigo-600 mb-4">
-						Getting Started
-					</h2>
-					<ul className="space-y-3 text-gray-700">
-						<li className="flex items-start gap-2">
-							<span className="text-indigo-500 font-bold">1.</span>
-							<span>
-								Run{" "}
-								<code className="bg-gray-100 px-2 py-1 rounded text-sm">
-									bun run dev
-								</code>{" "}
-								for development without HMR
-							</span>
-						</li>
-						<li className="flex items-start gap-2">
-							<span className="text-indigo-500 font-bold">2.</span>
-							<span>
-								Run{" "}
-								<code className="bg-gray-100 px-2 py-1 rounded text-sm">
-									bun run dev:hmr
-								</code>{" "}
-								for development with hot reload
-							</span>
-						</li>
-						<li className="flex items-start gap-2">
-							<span className="text-indigo-500 font-bold">3.</span>
-							<span>
-								Run{" "}
-								<code className="bg-gray-100 px-2 py-1 rounded text-sm">
-									bun run build
-								</code>{" "}
-								to build for production
-							</span>
-						</li>
-					</ul>
-				</div>
-
-				<div className="bg-white rounded-xl shadow-xl p-8">
-					<h2 className="text-2xl font-semibold text-indigo-600 mb-4">Stack</h2>
-					<div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-						<div className="text-center p-4 bg-gray-50 rounded-lg">
-							<div className="text-3xl mb-2">⚡</div>
-							<div className="font-medium">Electrobun</div>
-						</div>
-						<div className="text-center p-4 bg-gray-50 rounded-lg">
-							<div className="text-3xl mb-2">⚛️</div>
-							<div className="font-medium">React</div>
-						</div>
-						<div className="text-center p-4 bg-gray-50 rounded-lg">
-							<div className="text-3xl mb-2">🎨</div>
-							<div className="font-medium">Tailwind</div>
-						</div>
-						<div className="text-center p-4 bg-gray-50 rounded-lg">
-							<div className="text-3xl mb-2">🔥</div>
-							<div className="font-medium">Vite HMR</div>
-						</div>
-					</div>
-				</div>
-
-				<div className="text-center text-white/80 mt-10 p-6 bg-white/10 rounded-lg backdrop-blur">
-					<p>
-						Edit{" "}
-						<code className="bg-white/20 px-2 py-1 rounded text-sm">
-							src/mainview/App.tsx
-						</code>{" "}
-						and save to see HMR in action
-					</p>
-				</div>
+		<div className="panel">
+			{/* Header */}
+			<div className="panel-header">
+				<span className="panel-title">Screenshot</span>
+				<button
+					className={`toggle ${showPointer ? "toggle-on" : ""}`}
+					onClick={() => setShowPointer(!showPointer)}
+				>
+					<div className="toggle-thumb" />
+				</button>
 			</div>
+
+			<div className="sep" />
+
+			{/* Capture Modes */}
+			<div className="section-label">Capture Mode</div>
+			<div className="mode-group">
+				<ModeRow
+					icon="monitor"
+					label="Full Screen"
+					active={mode === "fullscreen"}
+					onClick={() => setMode("fullscreen")}
+				/>
+				<ModeRow
+					icon="window"
+					label="Window"
+					active={mode === "window"}
+					onClick={() => setMode("window")}
+				/>
+				<ModeRow
+					icon="area"
+					label="Selection"
+					active={mode === "area"}
+					onClick={() => setMode("area")}
+				/>
+			</div>
+
+			<div className="sep" />
+
+			{/* Timer */}
+			<div className="section-label">Timer</div>
+			<div className="timer-row">
+				{timerOptions.map((t) => (
+					<button
+						key={t}
+						onClick={() => setTimer(t)}
+						className={`timer-pill ${timer === t ? "timer-active" : ""}`}
+					>
+						{t === 0 ? "Off" : `${t}s`}
+					</button>
+				))}
+			</div>
+
+			<div className="sep" />
+
+			{/* Capture */}
+			<button className="capture-row">
+				<CaptureIcon />
+				<span>Capture Screenshot</span>
+			</button>
+
+			<div className="sep" />
+
+			{/* Quit */}
+			{!showQuitConfirm ? (
+				<button className="quit-row" onClick={() => setShowQuitConfirm(true)}>
+					Quit Screencopy
+				</button>
+			) : (
+				<div className="quit-confirm">
+					<span className="quit-confirm-text">Quit Screencopy?</span>
+					<div className="quit-confirm-btns">
+						<button
+							className="quit-cancel"
+							onClick={() => setShowQuitConfirm(false)}
+						>
+							Cancel
+						</button>
+						<button
+							className="quit-confirm-btn"
+							onClick={() => sendQuit()}
+						>
+							Quit
+						</button>
+					</div>
+				</div>
+			)}
 		</div>
+	);
+}
+
+function ModeRow({
+	icon,
+	label,
+	active,
+	onClick,
+}: {
+	icon: string;
+	label: string;
+	active: boolean;
+	onClick: () => void;
+}) {
+	return (
+		<button className={`mode-row ${active ? "mode-row-active" : ""}`} onClick={onClick}>
+			<div className="mode-row-icon">
+				<ModeIcon type={icon} />
+			</div>
+			<span className="mode-row-label">{label}</span>
+			{active && (
+				<svg className="mode-row-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+					<path d="M20 6 9 17l-5-5" />
+				</svg>
+			)}
+		</button>
+	);
+}
+
+function ModeIcon({ type }: { type: string }) {
+	const props = { width: 18, height: 18, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.5, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
+	if (type === "monitor") {
+		return (
+			<svg {...props}>
+				<rect x="2" y="3" width="20" height="14" rx="2" />
+				<path d="M8 21h8" />
+				<path d="M12 17v4" />
+			</svg>
+		);
+	}
+	if (type === "window") {
+		return (
+			<svg {...props}>
+				<rect x="2" y="4" width="20" height="16" rx="2" />
+				<path d="M2 8h20" />
+				<path d="M6 6h.01" />
+				<path d="M9 6h.01" />
+			</svg>
+		);
+	}
+	return (
+		<svg {...props}>
+			<path d="M3 7V5a2 2 0 0 1 2-2h2" />
+			<path d="M17 3h2a2 2 0 0 1 2 2v2" />
+			<path d="M21 17v2a2 2 0 0 1-2 2h-2" />
+			<path d="M7 21H5a2 2 0 0 1-2-2v-2" />
+		</svg>
+	);
+}
+
+function CaptureIcon() {
+	return (
+		<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+			<path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z" />
+			<circle cx="12" cy="13" r="3" />
+		</svg>
 	);
 }
 

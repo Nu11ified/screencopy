@@ -3,16 +3,36 @@ import { BrowserWindow, Tray, Utils, Updater } from "electrobun/bun";
 const DEV_SERVER_PORT = 5173;
 const DEV_SERVER_URL = `http://localhost:${DEV_SERVER_PORT}`;
 
+const PANEL_WIDTH = 340;
+const PANEL_HEIGHT = 380;
+const QUIT_PORT = 47932;
+
 // Hide the dock icon — this is a topbar-only app
 Utils.setDockIconVisible(false);
 
-// Create system tray icon
+// Tiny local server so the UI can signal quit
+Bun.serve({
+	port: QUIT_PORT,
+	fetch(req) {
+		const url = new URL(req.url);
+		if (url.pathname === "/quit") {
+			console.log("Quit requested from panel");
+			setTimeout(() => process.exit(0), 100);
+			return new Response("ok", {
+				headers: { "Access-Control-Allow-Origin": "*" },
+			});
+		}
+		return new Response("not found", { status: 404 });
+	},
+});
+
+// Create system tray with screenshot icon
 const tray = new Tray({
-	title: "Screencopy",
+	title: "",
 	image: "views://assets/tray-icon-template.png",
 	template: true,
-	width: 22,
-	height: 22,
+	width: 16,
+	height: 16,
 });
 
 // Check if Vite dev server is running for HMR
@@ -32,49 +52,49 @@ async function getMainViewUrl(): Promise<string> {
 	return "views://mainview/index.html";
 }
 
-const url = await getMainViewUrl();
+const mainUrl = await getMainViewUrl();
 
-let mainWindow: InstanceType<typeof BrowserWindow> | null = null;
+let panelWindow: InstanceType<typeof BrowserWindow> | null = null;
 
-function createWindow() {
-	if (mainWindow) return;
+function togglePanel() {
+	if (panelWindow) {
+		panelWindow.close();
+		panelWindow = null;
+		return;
+	}
 
-	mainWindow = new BrowserWindow({
-		title: "Screencopy",
-		url,
+	const bounds = tray.getBounds();
+	const x = Math.round(bounds.x + bounds.width / 2 - PANEL_WIDTH / 2);
+	const y = 37;
+
+	panelWindow = new BrowserWindow({
+		title: "",
+		url: mainUrl,
+		titleBarStyle: "hidden",
+		styleMask: ["Borderless"],
+		transparent: true,
 		frame: {
-			width: 400,
-			height: 500,
-			x: 200,
-			y: 50,
+			width: PANEL_WIDTH,
+			height: PANEL_HEIGHT,
+			x,
+			y,
 		},
+	});
+
+	panelWindow.setAlwaysOnTop(true);
+
+	panelWindow.on("blur", () => {
+		if (panelWindow) {
+			panelWindow.close();
+			panelWindow = null;
+		}
 	});
 }
 
-// Set up tray menu
-tray.setMenu([
-	{
-		type: "normal",
-		label: "Show Window",
-		action: "show-window",
-	},
-	{
-		type: "divider",
-	},
-	{
-		type: "normal",
-		label: "Quit Screencopy",
-		action: "quit",
-	},
-]);
-
 tray.on("tray-clicked", (e) => {
 	const { action } = e.data as { id: number; action: string };
-
-	if (action === "" || action === "show-window") {
-		createWindow();
-	} else if (action === "quit") {
-		process.exit(0);
+	if (action === "") {
+		togglePanel();
 	}
 });
 

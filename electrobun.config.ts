@@ -5,6 +5,8 @@ export default {
 		name: "screencopy",
 		identifier: "dev.screencopy.app",
 		version: "0.0.1",
+	},
+	runtime: {
 		exitOnLastWindowClosed: false,
 	},
 	build: {
@@ -12,6 +14,7 @@ export default {
 		copy: {
 			"dist/index.html": "views/mainview/index.html",
 			"dist/assets": "views/mainview/assets",
+			"src/mainview/assets/tray-icon-template.png": "views/assets/tray-icon-template.png",
 		},
 		// Ignore Vite output in watch mode — HMR handles view rebuilds separately
 		watchIgnore: ["dist/**"],

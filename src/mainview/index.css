@@ -1,89 +1,352 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 @import "@fontsource-variable/geist";
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
 
 @layer base {
-  .theme {
-    --font-heading: var(--font-sans);
-    --font-sans: 'Geist Variable', sans-serif
-  }
   :root {
-    --background: oklch(1 0 0);
-    --foreground: oklch(0.145 0 0);
-    --card: oklch(1 0 0);
-    --card-foreground: oklch(0.145 0 0);
-    --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.145 0 0);
-    --primary: oklch(0.205 0 0);
-    --primary-foreground: oklch(0.985 0 0);
-    --secondary: oklch(0.97 0 0);
-    --secondary-foreground: oklch(0.205 0 0);
-    --muted: oklch(0.97 0 0);
-    --muted-foreground: oklch(0.556 0 0);
-    --accent: oklch(0.97 0 0);
-    --accent-foreground: oklch(0.205 0 0);
-    --destructive: oklch(0.577 0.245 27.325);
-    --border: oklch(0.922 0 0);
-    --input: oklch(0.922 0 0);
-    --ring: oklch(0.708 0 0);
-    --chart-1: oklch(0.87 0 0);
-    --chart-2: oklch(0.556 0 0);
-    --chart-3: oklch(0.439 0 0);
-    --chart-4: oklch(0.371 0 0);
-    --chart-5: oklch(0.269 0 0);
-    --radius: 0.625rem;
-    --sidebar: oklch(0.985 0 0);
-    --sidebar-foreground: oklch(0.145 0 0);
-    --sidebar-primary: oklch(0.205 0 0);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.97 0 0);
-    --sidebar-accent-foreground: oklch(0.205 0 0);
-    --sidebar-border: oklch(0.922 0 0);
-    --sidebar-ring: oklch(0.708 0 0)
+    --glass-bg: rgba(255, 255, 255, 0.65);
+    --glass-border: rgba(255, 255, 255, 0.45);
+    --text-primary: rgba(0, 0, 0, 0.85);
+    --text-secondary: rgba(0, 0, 0, 0.5);
+    --text-tertiary: rgba(0, 0, 0, 0.35);
+    --row-hover: rgba(0, 0, 0, 0.04);
+    --row-active: rgba(0, 122, 255, 0.12);
+    --sep-color: rgba(0, 0, 0, 0.08);
+    --pill-bg: rgba(0, 0, 0, 0.05);
+    --pill-active-bg: rgba(255, 255, 255, 0.85);
+    --accent: #007AFF;
   }
-  .dark {
-    --background: oklch(0.145 0 0);
-    --foreground: oklch(0.985 0 0);
-    --card: oklch(0.205 0 0);
-    --card-foreground: oklch(0.985 0 0);
-    --popover: oklch(0.205 0 0);
-    --popover-foreground: oklch(0.985 0 0);
-    --primary: oklch(0.922 0 0);
-    --primary-foreground: oklch(0.205 0 0);
-    --secondary: oklch(0.269 0 0);
-    --secondary-foreground: oklch(0.985 0 0);
-    --muted: oklch(0.269 0 0);
-    --muted-foreground: oklch(0.708 0 0);
-    --accent: oklch(0.269 0 0);
-    --accent-foreground: oklch(0.985 0 0);
-    --destructive: oklch(0.704 0.191 22.216);
-    --border: oklch(1 0 0 / 10%);
-    --input: oklch(1 0 0 / 15%);
-    --ring: oklch(0.556 0 0);
-    --chart-1: oklch(0.87 0 0);
-    --chart-2: oklch(0.556 0 0);
-    --chart-3: oklch(0.439 0 0);
-    --chart-4: oklch(0.371 0 0);
-    --chart-5: oklch(0.269 0 0);
-    --sidebar: oklch(0.205 0 0);
-    --sidebar-foreground: oklch(0.985 0 0);
-    --sidebar-primary: oklch(0.488 0.243 264.376);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.269 0 0);
-    --sidebar-accent-foreground: oklch(0.985 0 0);
-    --sidebar-border: oklch(1 0 0 / 10%);
-    --sidebar-ring: oklch(0.556 0 0)
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --glass-bg: rgba(30, 30, 32, 0.72);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --text-primary: rgba(255, 255, 255, 0.88);
+      --text-secondary: rgba(255, 255, 255, 0.55);
+      --text-tertiary: rgba(255, 255, 255, 0.3);
+      --row-hover: rgba(255, 255, 255, 0.06);
+      --row-active: rgba(0, 122, 255, 0.25);
+      --sep-color: rgba(255, 255, 255, 0.08);
+      --pill-bg: rgba(255, 255, 255, 0.07);
+      --pill-active-bg: rgba(255, 255, 255, 0.15);
+      --accent: #0A84FF;
+    }
   }
+
   * {
-    @apply border-border outline-ring/50;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
   }
+
   body {
-    @apply bg-background text-foreground;
+    background: transparent;
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
   }
+
   html {
-    @apply font-sans;
+    font-family: 'Geist Variable', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    font-size: 13px;
+    color: var(--text-primary);
+  }
+}
+
+/* ── Panel ── */
+
+@keyframes panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.panel {
+  margin: 6px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(72px) saturate(190%);
+  -webkit-backdrop-filter: blur(72px) saturate(190%);
+  border-radius: 14px;
+  border: 0.5px solid var(--glass-border);
+  box-shadow:
+    0 0 0 0.5px rgba(0, 0, 0, 0.12),
+    0 12px 48px rgba(0, 0, 0, 0.15),
+    0 2px 8px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  animation: panel-in 0.16s cubic-bezier(0.16, 1, 0.3, 1) both;
+  user-select: none;
+  cursor: default;
+}
+
+/* ── Header ── */
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px 10px;
+}
+
+.panel-title {
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+/* ── Toggle ── */
+
+.toggle {
+  width: 40px;
+  height: 24px;
+  border-radius: 12px;
+  border: none;
+  background: rgba(0, 0, 0, 0.12);
+  cursor: pointer;
+  position: relative;
+  padding: 0;
+  transition: background 0.2s ease;
+  flex-shrink: 0;
+}
+
+.toggle-on {
+  background: var(--accent);
+}
+
+.toggle-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: white;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.toggle-on .toggle-thumb {
+  transform: translateX(16px);
+}
+
+@media (prefers-color-scheme: dark) {
+  .toggle:not(.toggle-on) {
+    background: rgba(255, 255, 255, 0.15);
+  }
+  .toggle-thumb {
+    background: rgba(255, 255, 255, 0.97);
+  }
+}
+
+/* ── Separator ── */
+
+.sep {
+  height: 0.5px;
+  margin: 0 16px;
+  background: var(--sep-color);
+}
+
+/* ── Section Label ── */
+
+.section-label {
+  padding: 8px 16px 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ── Mode Rows ── */
+
+.mode-group {
+  padding: 4px 8px;
+}
+
+.mode-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 7px 8px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background 0.1s ease;
+  font-size: 13px;
+  text-align: left;
+}
+
+.mode-row:hover {
+  background: var(--row-hover);
+}
+
+.mode-row-active {
+  background: var(--row-active);
+}
+
+.mode-row-active:hover {
+  background: var(--row-active);
+}
+
+.mode-row-icon {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  background: var(--accent);
+  color: white;
+  flex-shrink: 0;
+}
+
+.mode-row-label {
+  flex: 1;
+  font-weight: 450;
+}
+
+.mode-row-check {
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+/* ── Timer ── */
+
+.timer-row {
+  display: flex;
+  gap: 3px;
+  padding: 6px 16px 10px;
+}
+
+.timer-pill {
+  flex: 1;
+  padding: 5px 0;
+  border: none;
+  border-radius: 6px;
+  background: var(--pill-bg);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.12s ease;
+  text-align: center;
+}
+
+.timer-pill:hover {
+  background: var(--row-hover);
+  color: var(--text-primary);
+}
+
+.timer-active {
+  background: var(--pill-active-bg);
+  color: var(--text-primary);
+  box-shadow: 0 0.5px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* ── Capture Row ── */
+
+.capture-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 16px;
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: background 0.1s ease;
+  font-size: 13px;
+  font-weight: 450;
+}
+
+.capture-row:hover {
+  background: var(--row-hover);
+}
+
+/* ── Quit ── */
+
+.quit-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 8px 16px 10px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.1s ease;
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.quit-row:hover {
+  background: var(--row-hover);
+  color: var(--text-primary);
+}
+
+/* ── Quit Confirm ── */
+
+.quit-confirm {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px 10px 16px;
+  gap: 12px;
+}
+
+.quit-confirm-text {
+  font-size: 12px;
+  color: var(--text-secondary);
+  font-weight: 450;
+}
+
+.quit-confirm-btns {
+  display: flex;
+  gap: 6px;
+}
+
+.quit-cancel,
+.quit-confirm-btn {
+  padding: 4px 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.1s ease;
+}
+
+.quit-cancel {
+  background: var(--pill-bg);
+  color: var(--text-primary);
+}
+
+.quit-cancel:hover {
+  background: var(--row-hover);
+}
+
+.quit-confirm-btn {
+  background: rgba(255, 59, 48, 0.15);
+  color: #FF3B30;
+}
+
+.quit-confirm-btn:hover {
+  background: rgba(255, 59, 48, 0.25);
+}
+
+@media (prefers-color-scheme: dark) {
+  .quit-confirm-btn {
+    background: rgba(255, 69, 58, 0.2);
+    color: #FF453A;
+  }
+  .quit-confirm-btn:hover {
+    background: rgba(255, 69, 58, 0.3);
   }
 }
