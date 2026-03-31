@@ -16,7 +16,7 @@ enum Tab: String, CaseIterable {
 
 struct MenuBarView: View {
     @EnvironmentObject var captureService: CaptureService
-    @EnvironmentObject var appState: AppState
+    @EnvironmentObject var storage: StorageService
     @State private var selectedTab: Tab = .capture
     @State private var selectedCapture: Capture?
 
@@ -38,7 +38,6 @@ struct MenuBarView: View {
 
                 Divider()
 
-                // Tab bar
                 HStack(spacing: 0) {
                     ForEach(Tab.allCases, id: \.self) { tab in
                         Button {
@@ -67,12 +66,11 @@ struct MenuBarView: View {
 
 struct CapturePanel: View {
     @EnvironmentObject var captureService: CaptureService
-    @EnvironmentObject var appState: AppState
+    @EnvironmentObject var storage: StorageService
     @State private var copied = false
 
     var body: some View {
         VStack(spacing: 0) {
-            // Header
             HStack {
                 Text("Screencopy")
                     .font(.system(size: 14, weight: .semibold))
@@ -84,12 +82,11 @@ struct CapturePanel: View {
 
             Divider().padding(.horizontal, 16)
 
-            // Capture buttons
             VStack(spacing: 6) {
                 Button {
                     Task {
                         if let capture = await captureService.captureFullscreen() {
-                            appState.addCapture(capture)
+                            storage.saveCapture(capture)
                             ClipboardService.copyWithPreset(capture.text, preset: Preset.defaults[0])
                             copied = true
                             DispatchQueue.main.asyncAfter(deadline: .now() + 2) { copied = false }
@@ -112,13 +109,12 @@ struct CapturePanel: View {
                 .disabled(captureService.isCapturing)
 
                 Button {
-                    // TODO: Region capture overlay
+                    // TODO: Region capture
                 } label: {
                     HStack {
                         Image(systemName: "crop")
                         Text("Capture Region")
                         Spacer()
-                        Text("Soon").font(.caption2).foregroundStyle(.tertiary)
                     }
                     .padding(.horizontal, 12)
                     .padding(.vertical, 8)
@@ -129,7 +125,6 @@ struct CapturePanel: View {
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
 
-            // Last capture preview
             if let capture = captureService.lastCapture {
                 Divider().padding(.horizontal, 16)
 

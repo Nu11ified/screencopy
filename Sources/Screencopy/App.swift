@@ -3,37 +3,36 @@ import SwiftUI
 @main
 struct ScreencopyApp: App {
     @StateObject private var captureService = CaptureService()
-    @StateObject private var appState = AppState()
+    @StateObject private var storage = StorageService()
+    private let hotkeyService = HotkeyService()
+
+    init() {
+        // Register global hotkeys after a short delay to ensure app is ready
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) { [hotkeyService] in
+            hotkeyService.registerDefaults(
+                onCaptureFullscreen: {
+                    print("[App] Fullscreen capture triggered via hotkey")
+                    // Capture is handled by the service
+                },
+                onCaptureRegion: {
+                    print("[App] Region capture triggered via hotkey")
+                },
+                onTogglePanel: {
+                    print("[App] Toggle panel triggered via hotkey")
+                }
+            )
+        }
+    }
 
     var body: some Scene {
         MenuBarExtra {
             MenuBarView()
                 .environmentObject(captureService)
-                .environmentObject(appState)
+                .environmentObject(storage)
         } label: {
             Image(systemName: "camera.viewfinder")
                 .symbolRenderingMode(.hierarchical)
         }
         .menuBarExtraStyle(.window)
-    }
-}
-
-@MainActor
-class AppState: ObservableObject {
-    @Published var captures: [Capture] = []
-    @Published var searchQuery = ""
-
-    var filteredCaptures: [Capture] {
-        if searchQuery.isEmpty { return captures }
-        let q = searchQuery.lowercased()
-        return captures.filter { $0.textNormalized.contains(q) }
-    }
-
-    func addCapture(_ capture: Capture) {
-        captures.insert(capture, at: 0)
-    }
-
-    func removeCapture(id: String) {
-        captures.removeAll { $0.id == id }
     }
 }
