@@ -47,6 +47,9 @@ export function CaptureView({ onCaptured }: { onCaptured?: (c: Capture) => void 
 				>
 					{capturing ? "Capturing..." : "Capture & Copy"}
 				</button>
+				<div className="capture-hint">
+					<kbd>Cmd+Shift+5</kbd> fullscreen &middot; <kbd>Cmd+Shift+6</kbd> region
+				</div>
 			</div>
 
 			{/* Last capture preview */}

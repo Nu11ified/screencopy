@@ -5,6 +5,7 @@ import { initDatabase } from "./db/schema";
 import { SQLiteStorage } from "./db/repository";
 import { CaptureService } from "./services/capture";
 import { CopyPresetService } from "./services/copy-presets";
+import { ShortcutService } from "./services/shortcuts";
 import { createServer } from "./server";
 
 const DEV_SERVER_PORT = 5173;
@@ -42,6 +43,7 @@ const tray = new Tray({
 
 function quit() {
 	console.log("Quit requested");
+	shortcuts.unregisterAll();
 	tray.remove();
 	captureService.destroy();
 	db.close();
@@ -73,12 +75,8 @@ const mainUrl = await getMainViewUrl();
 
 let panelWindow: InstanceType<typeof BrowserWindow> | null = null;
 
-function togglePanel() {
-	if (panelWindow) {
-		panelWindow.close();
-		panelWindow = null;
-		return;
-	}
+function showPanel() {
+	if (panelWindow) return;
 
 	const bounds = tray.getBounds();
 	const x = Math.round(bounds.x + bounds.width / 2 - PANEL_WIDTH / 2);
@@ -108,6 +106,37 @@ function togglePanel() {
 	});
 }
 
+function togglePanel() {
+	if (panelWindow) {
+		panelWindow.close();
+		panelWindow = null;
+	} else {
+		showPanel();
+	}
+}
+
+// Global shortcuts
+async function captureFromShortcut(mode: "fullscreen" | "region") {
+	try {
+		const capture = await captureService.capture({ mode });
+		// Auto-copy plain text to clipboard
+		await presetService.applyAndCopy("plain", capture.text);
+		console.log(`Captured (${mode}): ${capture.text.slice(0, 60)}...`);
+		// Show panel so user can see result
+		showPanel();
+	} catch (err) {
+		console.error("Shortcut capture failed:", err);
+	}
+}
+
+const shortcuts = new ShortcutService({
+	onCaptureFullscreen: () => captureFromShortcut("fullscreen"),
+	onCaptureRegion: () => captureFromShortcut("region"),
+	onOpenHistory: () => togglePanel(),
+});
+shortcuts.register();
+
+// Tray click
 tray.on("tray-clicked", (e) => {
 	const { action } = e.data as { id: number; action: string };
 	if (action === "") {
