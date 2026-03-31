@@ -213,18 +213,24 @@ const shortcuts = new ShortcutService({
 });
 
 // Load saved shortcuts, then register
-(async () => {
-	const savedShortcuts = await storage.getSetting("shortcuts");
-	if (savedShortcuts) {
-		try {
-			shortcuts.updateConfig(JSON.parse(savedShortcuts));
-		} catch {
+const savedShortcuts = await storage.getSetting("shortcuts");
+if (savedShortcuts) {
+	try {
+		const parsed = JSON.parse(savedShortcuts);
+		// Skip saved config if it uses old conflicting defaults
+		if (parsed.captureFullscreen?.includes("+5")) {
+			console.log("Resetting shortcuts from old defaults");
+			await storage.setSetting("shortcuts", "");
 			shortcuts.register();
+		} else {
+			shortcuts.updateConfig(parsed);
 		}
-	} else {
+	} catch {
 		shortcuts.register();
 	}
-})();
+} else {
+	shortcuts.register();
+}
 
 // Tray click
 tray.on("tray-clicked", (e) => {

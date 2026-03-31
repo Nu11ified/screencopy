@@ -53,7 +53,7 @@ export function CaptureView({ onCaptured }: { onCaptured?: (c: Capture) => void 
 					{capturing ? "Capturing..." : "Capture & Copy"}
 				</button>
 				<div className="capture-hint">
-					<kbd>{"\u2318\u21E75"}</kbd> fullscreen &middot; <kbd>{"\u2318\u21E76"}</kbd> region
+					<kbd>{"\u2318\u21E71"}</kbd> fullscreen &middot; <kbd>{"\u2318\u21E72"}</kbd> region
 				</div>
 			</div>
 
