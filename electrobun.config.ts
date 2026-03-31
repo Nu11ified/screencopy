@@ -15,6 +15,7 @@ export default {
 			"dist/index.html": "views/mainview/index.html",
 			"dist/assets": "views/mainview/assets",
 			"src/mainview/assets/tray-icon-template.png": "views/assets/tray-icon-template.png",
+			"src/zig/zig-out/lib/libscreencopy.dylib": "MacOS/libscreencopy.dylib",
 		},
 		// Ignore Vite output in watch mode — HMR handles view rebuilds separately
 		watchIgnore: ["dist/**"],

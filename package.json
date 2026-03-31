@@ -3,7 +3,8 @@
 	"version": "1.0.0",
 	"description": "Screen copy topbar utility",
 	"scripts": {
-		"start": "vite build && electrobun dev",
+		"build:zig": "cd src/zig && zig build -Doptimize=ReleaseFast",
+		"start": "bun run build:zig && vite build && electrobun dev",
 		"dev": "electrobun dev --watch",
 		"dev:hmr": "concurrently \"bun run hmr\" \"bun run start\"",
 		"hmr": "vite --port 5173",

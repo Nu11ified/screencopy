@@ -1,33 +1,37 @@
 import { BrowserWindow, Tray, Utils, Updater } from "electrobun/bun";
+import { join } from "path";
+import { mkdirSync, existsSync } from "fs";
+import { initDatabase } from "./db/schema";
+import { SQLiteStorage } from "./db/repository";
+import { CaptureService } from "./services/capture";
+import { CopyPresetService } from "./services/copy-presets";
+import { createServer } from "./server";
 
 const DEV_SERVER_PORT = 5173;
 const DEV_SERVER_URL = `http://localhost:${DEV_SERVER_PORT}`;
+const API_PORT = 47932;
 
 const PANEL_WIDTH = 340;
-const PANEL_HEIGHT = 380;
-const QUIT_PORT = 47932;
+const PANEL_HEIGHT = 480;
+
+// Storage directory in ~/Documents/Screencopy
+const homeDir = process.env.HOME ?? "/tmp";
+const STORAGE_DIR = join(homeDir, "Documents", "Screencopy");
+if (!existsSync(STORAGE_DIR)) {
+	mkdirSync(STORAGE_DIR, { recursive: true });
+}
+const DB_PATH = join(STORAGE_DIR, "screencopy.db");
 
 // Hide the dock icon — this is a topbar-only app
 Utils.setDockIconVisible(false);
 
-// Tiny local server so the UI can signal quit
-Bun.serve({
-	port: QUIT_PORT,
-	fetch(req) {
-		const url = new URL(req.url);
-		if (url.pathname === "/quit") {
-			console.log("Quit requested from panel");
-			tray.remove();
-			setTimeout(() => process.exit(0), 100);
-			return new Response("ok", {
-				headers: { "Access-Control-Allow-Origin": "*" },
-			});
-		}
-		return new Response("not found", { status: 404 });
-	},
-});
+// Initialize database and services
+const db = initDatabase(DB_PATH);
+const storage = new SQLiteStorage(db);
+const captureService = new CaptureService(storage, STORAGE_DIR);
+const presetService = new CopyPresetService(storage);
 
-// Create system tray with screenshot icon
+// Create system tray
 const tray = new Tray({
 	title: "",
 	image: "views://assets/tray-icon-template.png",
@@ -35,6 +39,18 @@ const tray = new Tray({
 	width: 16,
 	height: 16,
 });
+
+function quit() {
+	console.log("Quit requested");
+	tray.remove();
+	captureService.destroy();
+	db.close();
+	setTimeout(() => process.exit(0), 100);
+}
+
+// Start API server
+createServer(API_PORT, captureService, presetService, STORAGE_DIR, quit);
+console.log(`API server running on port ${API_PORT}`);
 
 // Check if Vite dev server is running for HMR
 async function getMainViewUrl(): Promise<string> {
@@ -100,3 +116,4 @@ tray.on("tray-clicked", (e) => {
 });
 
 console.log("Screencopy topbar app started!");
+console.log(`Storage: ${STORAGE_DIR}`);
