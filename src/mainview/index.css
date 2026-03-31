@@ -36,7 +36,7 @@
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { background: transparent; margin: 0; -webkit-font-smoothing: antialiased; }
+  body { background: var(--glass-bg); margin: 0; -webkit-font-smoothing: antialiased; }
   html {
     font-family: 'Geist Variable', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
     font-size: 13px;

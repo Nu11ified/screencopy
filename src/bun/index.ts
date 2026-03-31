@@ -105,7 +105,6 @@ function showPanel() {
 		url: mainUrl,
 		titleBarStyle: "hidden",
 		styleMask: ["Borderless"],
-		transparent: true,
 		frame: {
 			width: PANEL_WIDTH,
 			height: PANEL_HEIGHT,
