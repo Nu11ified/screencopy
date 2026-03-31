@@ -216,13 +216,9 @@ const shortcuts = new ShortcutService({
 	onOpenHistory: () => togglePanel(),
 });
 
-// NOTE: GlobalShortcut is broken in Electrobun v1.16 for unsigned dev builds.
-// See https://github.com/blackboardsh/electrobun/issues/334
-// Shortcuts register but never fire because NSEvent global monitor
-// requires Accessibility permission that doesn't cascade to the bun subprocess.
-// Keeping the service for when this is fixed upstream.
-// shortcuts.register();
-console.log("Global shortcuts disabled (electrobun#334 — awaiting Carbon API fix)");
+// GlobalShortcut disabled — broken in Electrobun v1.16 (blackboardsh/electrobun#334)
+// NSEvent global monitor doesn't work in bun subprocess even with ad-hoc codesign.
+// Use tray menu for all actions instead.
 
 // Tray menu with quick actions
 tray.setMenu([
