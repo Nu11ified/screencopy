@@ -68,6 +68,7 @@ export class CaptureService {
 			regionW: opts.region?.width,
 			regionH: opts.region?.height,
 			createdAt: Date.now(),
+			syncStatus: "local",
 		};
 
 		await this.storage.saveCapture(capture);

@@ -6,6 +6,7 @@ import { SQLiteStorage } from "./db/repository";
 import { CaptureService } from "./services/capture";
 import { CopyPresetService } from "./services/copy-presets";
 import { ShortcutService } from "./services/shortcuts";
+import { GitForgeSyncService } from "./services/gitforge-sync";
 import { createServer } from "./server";
 
 const DEV_SERVER_PORT = 5173;
@@ -32,6 +33,22 @@ const storage = new SQLiteStorage(db);
 const captureService = new CaptureService(storage, STORAGE_DIR);
 const presetService = new CopyPresetService(storage);
 
+// Initialize GitForge sync
+const syncService = new GitForgeSyncService(storage, STORAGE_DIR);
+
+// Load saved GitForge config if exists
+(async () => {
+	const savedConfig = await storage.getSetting("gitforge_config");
+	if (savedConfig) {
+		try {
+			syncService.configure(JSON.parse(savedConfig));
+			syncService.startAutoSync();
+		} catch {
+			console.log("No valid GitForge config found");
+		}
+	}
+})();
+
 // Create system tray
 const tray = new Tray({
 	title: "",
@@ -44,6 +61,7 @@ const tray = new Tray({
 function quit() {
 	console.log("Quit requested");
 	shortcuts.unregisterAll();
+	syncService.stopAutoSync();
 	tray.remove();
 	captureService.destroy();
 	db.close();
@@ -51,7 +69,7 @@ function quit() {
 }
 
 // Start API server
-createServer(API_PORT, captureService, presetService, STORAGE_DIR, quit);
+createServer(API_PORT, captureService, presetService, syncService, storage, STORAGE_DIR, quit);
 console.log(`API server running on port ${API_PORT}`);
 
 // Check if Vite dev server is running for HMR

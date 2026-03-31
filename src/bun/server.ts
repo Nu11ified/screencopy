@@ -1,11 +1,15 @@
 import { join } from "path";
 import type { CaptureService } from "./services/capture";
 import type { CopyPresetService } from "./services/copy-presets";
+import type { GitForgeSyncService } from "./services/gitforge-sync";
+import type { StorageBackend } from "./db/storage";
 
 export function createServer(
 	port: number,
 	captureService: CaptureService,
 	presetService: CopyPresetService,
+	syncService: GitForgeSyncService,
+	storage: StorageBackend,
 	storageDir: string,
 	onQuit: () => void,
 ) {
@@ -98,6 +102,50 @@ export function createServer(
 				if (req.method === "GET" && path === "/api/presets") {
 					const presets = await presetService.getPresets();
 					return Response.json(presets, { headers });
+				}
+
+				// GET /api/sync/status
+				if (req.method === "GET" && path === "/api/sync/status") {
+					const config = syncService.getConfig();
+					return Response.json({
+						configured: syncService.isConfigured(),
+						org: config?.org ?? null,
+						repo: config?.repo ?? null,
+					}, { headers });
+				}
+
+				// POST /api/sync/configure
+				if (req.method === "POST" && path === "/api/sync/configure") {
+					const body = (await req.json()) as {
+						token: string;
+						org: string;
+						repo: string;
+						baseUrl?: string;
+					};
+					const config = {
+						token: body.token,
+						org: body.org,
+						repo: body.repo,
+						baseUrl: body.baseUrl ?? "https://api.gitforge.dev",
+					};
+					syncService.configure(config);
+					syncService.startAutoSync();
+					// Persist config
+					await storage.setSetting("gitforge_config", JSON.stringify(config));
+					return Response.json({ ok: true }, { headers });
+				}
+
+				// POST /api/sync/disconnect
+				if (req.method === "POST" && path === "/api/sync/disconnect") {
+					syncService.disconnect();
+					await storage.setSetting("gitforge_config", "");
+					return Response.json({ ok: true }, { headers });
+				}
+
+				// POST /api/sync/now
+				if (req.method === "POST" && path === "/api/sync/now") {
+					const result = await syncService.syncAll();
+					return Response.json(result, { headers });
 				}
 
 				// POST /api/quit

@@ -99,6 +99,25 @@ export class SQLiteStorage implements StorageBackend {
 			.run(preset.id, preset.name, preset.type, preset.template ?? null, preset.sortOrder);
 	}
 
+	async getUnsynced(): Promise<Capture[]> {
+		const rows = this.db
+			.prepare("SELECT * FROM captures WHERE sync_status IN ('local', 'error') ORDER BY created_at ASC")
+			.all() as CaptureRow[];
+		return rows.map(rowToCapture);
+	}
+
+	async markSynced(id: string, remoteId: string): Promise<void> {
+		this.db
+			.prepare("UPDATE captures SET sync_status = 'synced', synced_at = ?, remote_id = ? WHERE id = ?")
+			.run(Date.now(), remoteId, id);
+	}
+
+	async markSyncError(id: string): Promise<void> {
+		this.db
+			.prepare("UPDATE captures SET sync_status = 'error' WHERE id = ?")
+			.run(id);
+	}
+
 	async deletePreset(id: string): Promise<void> {
 		this.db.prepare("DELETE FROM presets WHERE id = ?").run(id);
 	}
@@ -130,6 +149,9 @@ interface CaptureRow {
 	region_h: number | null;
 	created_at: number;
 	metadata: string | null;
+	sync_status: string;
+	synced_at: number | null;
+	remote_id: string | null;
 }
 
 interface PresetRow {
@@ -153,5 +175,8 @@ function rowToCapture(row: CaptureRow): Capture {
 		regionH: row.region_h ?? undefined,
 		createdAt: row.created_at,
 		metadata: row.metadata ? JSON.parse(row.metadata) : undefined,
+		syncStatus: (row.sync_status as Capture["syncStatus"]) ?? "local",
+		syncedAt: row.synced_at ?? undefined,
+		remoteId: row.remote_id ?? undefined,
 	};
 }

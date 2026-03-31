@@ -563,6 +563,113 @@
   font-family: inherit;
 }
 
+/* ── Sync ── */
+
+.sync-form {
+  padding: 4px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sync-form-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.sync-slash {
+  color: var(--text-tertiary);
+  font-size: 14px;
+}
+
+.sync-input {
+  flex: 1;
+  padding: 6px 8px;
+  border: 1px solid var(--sep-color);
+  border-radius: 6px;
+  background: var(--pill-bg);
+  color: var(--text-primary);
+  font-size: 12px;
+  font-family: inherit;
+  outline: none;
+}
+
+.sync-input:focus {
+  border-color: var(--accent);
+}
+
+.sync-input::placeholder {
+  color: var(--text-tertiary);
+}
+
+.sync-actions {
+  display: flex;
+  gap: 6px;
+  padding: 4px 8px;
+}
+
+.sync-btn {
+  flex: 1;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 6px;
+  background: var(--pill-bg);
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.12s ease;
+}
+
+.sync-btn:hover {
+  background: var(--row-hover);
+}
+
+.sync-btn:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+
+.sync-btn-primary {
+  background: var(--accent);
+  color: white;
+}
+
+.sync-btn-primary:hover {
+  filter: brightness(1.1);
+}
+
+.sync-btn-danger {
+  color: var(--danger);
+}
+
+.sync-btn-danger:hover {
+  background: rgba(255, 59, 48, 0.1);
+}
+
+.sync-result {
+  padding: 4px 8px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.settings-connect-btn {
+  padding: 4px 10px;
+  border: none;
+  border-radius: 6px;
+  background: var(--accent);
+  color: white;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.settings-connect-btn:hover {
+  filter: brightness(1.1);
+}
+
 /* ── Quit ── */
 
 .quit-row {

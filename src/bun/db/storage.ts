@@ -1,5 +1,7 @@
 // Pluggable storage interface — SQLite now, GitForge later
 
+export type SyncStatus = "local" | "pending" | "synced" | "error";
+
 export interface Capture {
 	id: string;
 	imagePath: string;
@@ -12,6 +14,9 @@ export interface Capture {
 	regionH?: number;
 	createdAt: number; // unix timestamp ms
 	metadata?: Record<string, unknown>;
+	syncStatus: SyncStatus;
+	syncedAt?: number;
+	remoteId?: string;
 }
 
 export interface Preset {
@@ -35,6 +40,9 @@ export interface StorageBackend {
 	listCaptures(opts?: ListOptions): Promise<Capture[]>;
 	searchCaptures(query: string, limit?: number): Promise<Capture[]>;
 	deleteCapture(id: string): Promise<void>;
+	getUnsynced(): Promise<Capture[]>;
+	markSynced(id: string, remoteId: string): Promise<void>;
+	markSyncError(id: string): Promise<void>;
 	getPresets(): Promise<Preset[]>;
 	savePreset(preset: Preset): Promise<void>;
 	deletePreset(id: string): Promise<void>;

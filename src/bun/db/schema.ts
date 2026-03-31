@@ -1,6 +1,6 @@
 import { Database } from "bun:sqlite";
 
-const SCHEMA_VERSION = 1;
+const SCHEMA_VERSION = 2;
 
 export function initDatabase(dbPath: string): Database {
 	const db = new Database(dbPath, { create: true });
@@ -96,10 +96,20 @@ function migrate(db: Database, fromVersion: number) {
 			)
 		`);
 
-		// Set version
-		db.run("DELETE FROM _schema_version");
-		db.run("INSERT INTO _schema_version (version) VALUES (?)", [
-			SCHEMA_VERSION,
-		]);
 	}
+
+	if (fromVersion < 2) {
+		// Add sync tracking columns
+		db.run(`ALTER TABLE captures ADD COLUMN sync_status TEXT NOT NULL DEFAULT 'local'`);
+		db.run(`ALTER TABLE captures ADD COLUMN synced_at INTEGER`);
+		db.run(`ALTER TABLE captures ADD COLUMN remote_id TEXT`);
+
+		db.run(`CREATE INDEX IF NOT EXISTS idx_captures_sync_status ON captures(sync_status)`);
+	}
+
+	// Set version
+	db.run("DELETE FROM _schema_version");
+	db.run("INSERT INTO _schema_version (version) VALUES (?)", [
+		SCHEMA_VERSION,
+	]);
 }

@@ -73,6 +73,26 @@ export const api = {
 		return request<Preset[]>("/api/presets");
 	},
 
+	// Sync
+	getSyncStatus() {
+		return request<{ configured: boolean; org: string | null; repo: string | null }>("/api/sync/status");
+	},
+
+	configureSyncService(token: string, org: string, repo: string) {
+		return request<{ ok: boolean }>("/api/sync/configure", {
+			method: "POST",
+			body: JSON.stringify({ token, org, repo }),
+		});
+	},
+
+	disconnectSync() {
+		return request<{ ok: boolean }>("/api/sync/disconnect", { method: "POST" });
+	},
+
+	syncNow() {
+		return request<{ synced: number; errors: number }>("/api/sync/now", { method: "POST" });
+	},
+
 	quit() {
 		return fetch(`${API_BASE}/api/quit`, { method: "POST" }).catch(() => {});
 	},
