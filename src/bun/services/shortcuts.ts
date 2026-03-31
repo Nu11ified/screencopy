@@ -7,9 +7,9 @@ export interface ShortcutConfig {
 }
 
 const DEFAULT_SHORTCUTS: ShortcutConfig = {
-	captureFullscreen: "CommandOrControl+Shift+1",
-	captureRegion: "CommandOrControl+Shift+2",
-	openHistory: "CommandOrControl+Shift+3",
+	captureFullscreen: "Control+Alt+C",
+	captureRegion: "Control+Alt+X",
+	openHistory: "Control+Alt+S",
 };
 
 export class ShortcutService {
