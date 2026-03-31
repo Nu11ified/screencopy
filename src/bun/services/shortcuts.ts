@@ -9,7 +9,7 @@ export interface ShortcutConfig {
 const DEFAULT_SHORTCUTS: ShortcutConfig = {
 	captureFullscreen: "CommandOrControl+Shift+1",
 	captureRegion: "CommandOrControl+Shift+2",
-	openHistory: "CommandOrControl+Shift+S",
+	openHistory: "CommandOrControl+Shift+3",
 };
 
 export class ShortcutService {
@@ -30,20 +30,23 @@ export class ShortcutService {
 	}
 
 	register(): void {
-		const reg = (accel: string, handler: () => void) => {
+		const reg = (name: string, accel: string, handler: () => void) => {
 			if (!GlobalShortcut.isRegistered(accel)) {
-				const ok = GlobalShortcut.register(accel, handler);
+				const ok = GlobalShortcut.register(accel, () => {
+					console.log(`[Shortcut] ${name} triggered (${accel})`);
+					handler();
+				});
 				if (ok) {
-					console.log(`Registered shortcut: ${accel}`);
+					console.log(`Registered shortcut: ${name} = ${accel}`);
 				} else {
-					console.warn(`Failed to register shortcut: ${accel}`);
+					console.warn(`Failed to register shortcut: ${name} = ${accel}`);
 				}
 			}
 		};
 
-		reg(this.config.captureFullscreen, this.handlers.onCaptureFullscreen);
-		reg(this.config.captureRegion, this.handlers.onCaptureRegion);
-		reg(this.config.openHistory, this.handlers.onOpenHistory);
+		reg("captureFullscreen", this.config.captureFullscreen, this.handlers.onCaptureFullscreen);
+		reg("captureRegion", this.config.captureRegion, this.handlers.onCaptureRegion);
+		reg("openHistory", this.config.openHistory, this.handlers.onOpenHistory);
 	}
 
 	unregisterAll(): void {
